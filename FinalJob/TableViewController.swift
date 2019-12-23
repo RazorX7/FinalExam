@@ -22,6 +22,8 @@ class TableViewController: UITableViewController,URLSessionDelegate {
         fourArea.append(newArea(areaName: "人事新闻"))
         fourArea.append(newArea(areaName: "公示公告"))
         fourArea.append(newArea(areaName: "招聘信息"))
+        
+        print("节点加入完毕")
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
@@ -41,8 +43,11 @@ class TableViewController: UITableViewController,URLSessionDelegate {
               } else if let data = data,
                 let htmlFileStr = String(data:data,encoding: String.Encoding.utf8){
                 do {
+                    
                     self?.htmlFile = try SwiftSoup.parse(htmlFileStr)
                     self?.updataResults()
+                    DispatchQueue.main.async { self?.tableView.reloadData()
+                    }
                 }catch{
                     print("faild parsing!")
                 }
@@ -51,6 +56,9 @@ class TableViewController: UITableViewController,URLSessionDelegate {
         }
             // 7
         dataTask?.resume()
+        //
+        print("")
+        
         
     }
     
@@ -64,6 +72,7 @@ class TableViewController: UITableViewController,URLSessionDelegate {
                     var sum = 0
                     for eachNewsList:Element in newsListElement.array(){
                         do{
+                            //新闻标题
                             let titleElements = try eachNewsList.getElementsByClass("news_title")
                             let dateElements = try eachNewsList.getElementsByClass("news_meta")
                             let hotElements = try eachNewsList.getElementsByClass("news_meta1")
@@ -74,6 +83,7 @@ class TableViewController: UITableViewController,URLSessionDelegate {
                             var allURLs = [String]()
                             
                             for titleElement in titleElements{
+                                print("开始加载节点标题")
                                 let title = try titleElement.child(0).attr("title")
                                 
                                 let URL = try titleElement.child(0).attr("href")
@@ -105,12 +115,15 @@ class TableViewController: UITableViewController,URLSessionDelegate {
         // #warning Incomplete implementation, return the number of sections
         return 4
     }
+    
     override func tableView(_ tableView: UITableView, titleForHeaderInSection
                                 section: Int) -> String? {
         return fourArea[section].areaName
     }
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
+        print(fourArea[section].numOfChild)
         return fourArea[section].numOfChild
     }
     
@@ -121,15 +134,19 @@ class TableViewController: UITableViewController,URLSessionDelegate {
             let cellNode = fourArea[indexPath.section].areaChild[indexPath.row]
             cell.title.text = cellNode.title
             cell.date.text = cellNode.date
+            print("asd")
             if cellNode.hot > 1000{
-                cell.imageView?.isHidden = false
+                
+                cell.imagePic.isHidden = false //大于1000才现实图片
             }else{
-                cell.imageView?.isHidden = true
+                print(cellNode.hot)
+                cell.imagePic.isHidden = true
             }
             cell.url = cellNode.previewURL
         }
          return cell
     }
+    
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
           print("written \(bytesWritten) bytes")
 

@@ -21,7 +21,7 @@ class newArea{
     func addChild(titles:[String],urls:[String],dates:[String],hots:[String]) {
         let sum = titles.count
         //因为在html里面hot的存储是（10）这样的格式，所以需要做字符串解析
-        for i in 0...sum{
+        for i in 0...sum-1{
             var hot = hots[i]
             hot = hot.replacingOccurrences(of: "(", with: "")
             hot = hot.replacingOccurrences(of: ")", with: "")
